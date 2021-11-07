@@ -971,8 +971,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   teleportRay: {fileID: 290843618}
-  teleportActivationButton: 14
-  activationThreshold: 0.1
+  activationThreshold: 0.25
   scrollSpeed: 0.2
 --- !u!114 &473819245
 MonoBehaviour:
@@ -990,7 +989,7 @@ MonoBehaviour:
   m_TurnAmount: 45
   m_DebounceTime: 0.2
   m_EnableTurnLeftRight: 1
-  m_EnableTurnAround: 1
+  m_EnableTurnAround: 0
   m_TurnUsage: 0
   m_Controllers:
   - {fileID: 1411662630}
@@ -1166,7 +1165,7 @@ Transform:
   m_GameObject: {fileID: 599916901}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children: []
   m_Father: {fileID: 473819241}
   m_RootOrder: 1
