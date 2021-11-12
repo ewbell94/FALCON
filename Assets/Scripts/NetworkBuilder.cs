@@ -30,6 +30,8 @@ public class NetworkBuilder : MonoBehaviour
         Network thisState=new Network(){nodeNames=nodeNames,edgeGraph=edgeGraph,nodePositions=nodePositions};
         states.Add(thisState);
         DrawNetwork(nodePositions,edgeGraph,nodeNames);
+        MovementController xrMove= GameObject.Find("XR Rig").GetComponent<MovementController>();
+        xrMove.movementActive=true;
     }
 
     //Given a SIF file, extract the node connectivity array and node names
@@ -184,7 +186,6 @@ public class NetworkBuilder : MonoBehaviour
     */
     //Given a set of coordinates, scale them to ensure node separation, raise them off the ground, and center them
     private Vector3[] RegularizeCoords(Vector3[] coords){
-        float minHeight=1.0f;
         float minDist=1.0f;
 
         int nodeCount=coords.Length;
@@ -226,7 +227,6 @@ public class NetworkBuilder : MonoBehaviour
             newCoords[i]=coords[i];
             newCoords[i]-=maxvec-(maxvec-minvec)/2;
             newCoords[i]*=scale;
-            //newCoords[i].y-=(minvec.y*scale)-minHeight;
         }
 
         return newCoords;

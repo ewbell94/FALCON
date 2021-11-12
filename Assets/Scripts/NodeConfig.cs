@@ -18,7 +18,7 @@ public class NodeConfig : MonoBehaviour
     public void Labels(bool labelState){
         foreach (Transform child in transform){
             string name = child.gameObject.name;
-            GameObject.Find(name+"_label").active=labelState;
+            GameObject.Find(name+"_label").SetActive(labelState);
         }
     }
 }

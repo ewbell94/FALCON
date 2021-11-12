@@ -6,7 +6,7 @@ using UnityEditor;
 
 public class FileLoader : MonoBehaviour
 {
-    
+    /*
     void Start(){
         LoadExample();
 
@@ -45,7 +45,7 @@ public class FileLoader : MonoBehaviour
         EdgeConfig ec = edgeParent.GetComponent<EdgeConfig>();
         ec.SetColor(Color.green);
     }
-    
+    */
     public void OpenSIF(){
         string path = EditorUtility.OpenFilePanel("Choose interaction file...","","sif");
         NetworkBuilder n = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
