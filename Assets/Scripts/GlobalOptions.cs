@@ -1,56 +1,30 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
-
+using UnityEngine.SceneManagement;
 public class GlobalOptions : MonoBehaviour
 {
-    public GameObject nodeGroupPrefab;
-
-    public void NewNodeOrder(string[] groupNames, string[][] nodeMembers){
-        for(int i=0;i<groupNames.Length;i++){
-            GameObject nodeGroup = GameObject.Find(groupNames[i]);
-            if (nodeGroup == null){
-                nodeGroup = (GameObject) Instantiate(nodeGroupPrefab,Vector3.zero,Quaternion.identity);
-                nodeGroup.name=groupNames[i];
-            } 
-            foreach(string nodeName in nodeMembers[i]){
-                GameObject node = GameObject.Find(nodeName);
-                node.transform.SetParent(nodeGroup.transform,true);
-            }
-        }
-
-        foreach(GameObject nodeG in GameObject.FindGameObjectsWithTag("NodeGroup")){
-            if (nodeG.transform.childCount == 0){
-                Destroy(nodeG);
-            }
-        }
+    public GameObject nodeMenuPrefab;
+    public GameObject edgeMenuPrefab;
+    public void SpawnNodeMenu(){
+        Instantiate(nodeMenuPrefab,transform.position,transform.rotation);
     }
 
-    public void RenameNodes(string nameCsv){
-        string[] lines=File.ReadAllLines(nameCsv);
-        foreach(string line in lines){
-            string cleanline=line.Trim('\n');
-            string[] parts=cleanline.Split(',');
-            
-            GameObject node = GameObject.Find(parts[0]);
-            if (node == null){
-                continue;
-            } 
+    public void SpawnEdgeMenu(){
+        Instantiate(edgeMenuPrefab,transform.position,transform.rotation);
+    }
 
-            if (parts[0]!=parts[1] && GameObject.Find(parts[1]) != null){
-                int i = 1;
-                while (GameObject.Find(parts[1]+"_"+i.ToString()) != null){
-                    i++;
-                }
-                parts[1]=parts[1]+"_"+i.ToString();
-            }
-            node.name=parts[1];
+    public void QuitProgram(){
+        Application.Quit();
+    }
 
-            GameObject label = GameObject.Find(parts[0]+"_label");
-            label.name=parts[1]+"_label";
-            label.GetComponent<Text>().text=parts[1];
-        }
+    public void ReinitializeProgram(){
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void CloseOptions(){
+        MovementController xrMove= GameObject.Find("XR Rig").GetComponent<MovementController>();
+        xrMove.movementActive=true;
+        Destroy(gameObject);
     }
 }

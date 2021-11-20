@@ -235,7 +235,7 @@ public class NetworkBuilder : MonoBehaviour
     //Given a set of node positions and node connectivity, instantiate all objects of the network
     private void DrawNetwork(Vector3[] nodePositions, bool[,] edgeGraph, string[] nodeNames){
         GameObject[] newNodes= new GameObject[nodePositions.Length];
-        Transform canvas=GameObject.Find("Canvas").transform;
+        Transform canvas=GameObject.Find("NodeLabelCanvas").transform;
         Transform edgeParent = GameObject.Find("Edges").transform;
         Transform nodeParent = GameObject.Find("Nodes").transform;
         for (int i=0; i<nodePositions.Length; i++){

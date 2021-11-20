@@ -44,6 +44,8 @@ Shader "Custom/FCP_Gradient" {
 			struct v2f {
 				float4 pos : SV_POSITION;
 				fixed4 col : COLOR;
+
+				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			inline fixed4 HSV() {
@@ -69,6 +71,11 @@ Shader "Custom/FCP_Gradient" {
 			v2f vert(appdata_full vert)
 			{
 				v2f o;
+
+				UNITY_SETUP_INSTANCE_ID(vert);
+				UNITY_INITIALIZE_OUTPUT(v2f, o);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+				
 				o.pos = UnityObjectToClipPos(vert.vertex);
 				fixed4 colX, colY;
 

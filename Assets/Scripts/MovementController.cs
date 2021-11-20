@@ -30,6 +30,7 @@ public class MovementController : MonoBehaviour
             leftController=devices[0];
         }
     }
+
     void Update()
     {
         if (movementActive){
@@ -55,7 +56,7 @@ public class MovementController : MonoBehaviour
 
             if (buttonPressed){
                 Vector3 optPos=Camera.main.transform.position+2.5f*Camera.main.transform.forward;
-                Instantiate(optionsMenuPrefab,new Vector3(optPos.x,Camera.main.transform.position.y+1.0f,optPos.z),Quaternion.Euler(0.0f,Camera.main.transform.rotation.eulerAngles.y,0.0f));
+                Instantiate(optionsMenuPrefab,new Vector3(optPos.x,Camera.main.transform.position.y,optPos.z),Quaternion.Euler(0.0f,Camera.main.transform.rotation.eulerAngles.y,0.0f));
                 movementActive=false;
             }
         }
