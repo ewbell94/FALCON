@@ -7,7 +7,8 @@ public class GlobalOptions : MonoBehaviour
     public GameObject nodeMenuPrefab;
     public GameObject edgeMenuPrefab;
     public void SpawnNodeMenu(){
-        Instantiate(nodeMenuPrefab,transform.position,transform.rotation);
+        GameObject nodeMenu = (GameObject) Instantiate(nodeMenuPrefab,transform.position,transform.rotation);
+        nodeMenu.GetComponent<Canvas>().worldCamera = Camera.main;
     }
 
     public void SpawnEdgeMenu(){
