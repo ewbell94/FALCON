@@ -767,7 +767,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &4983928692539252345
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -801,7 +801,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodeMenuPrefab: {fileID: 3607717540100528501, guid: 5c30dcc1678ed614698ec470f2727c7a,
     type: 3}
-  edgeMenuPrefab: {fileID: 3607717540100528501, guid: 5c30dcc1678ed614698ec470f2727c7a,
+  edgeMenuPrefab: {fileID: 4192421492906541976, guid: f0c47effb33b34d4ab8bbe1cff627901,
     type: 3}
 --- !u!1 &4983928692553252302
 GameObject:

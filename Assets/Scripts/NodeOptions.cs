@@ -12,7 +12,7 @@ public class NodeOptions : MonoBehaviour
     public GameObject nodeGroupRowPrefab;
     public GameObject nodeRowPrefab;
     private GameObject optionsMenu;
-    public GameObject colorPicker;
+    private GameObject colorPicker;
     private List<InputField> nodeGroupRowFields = new List<InputField>();
     private List<Dropdown> nodeRowDrops = new List<Dropdown>();
     private List<Text> nodeRowNames = new List<Text>();

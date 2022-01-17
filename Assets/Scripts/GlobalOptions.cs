@@ -12,7 +12,8 @@ public class GlobalOptions : MonoBehaviour
     }
 
     public void SpawnEdgeMenu(){
-        Instantiate(edgeMenuPrefab,transform.position,transform.rotation);
+        GameObject edgeMenu = (GameObject) Instantiate(edgeMenuPrefab,transform.position,transform.rotation);
+        edgeMenu.GetComponent<Canvas>().worldCamera = Camera.main;
     }
 
     public void QuitProgram(){
