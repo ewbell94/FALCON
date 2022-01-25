@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEditor;
+
 public class GlobalOptions : MonoBehaviour
 {
     public GameObject nodeMenuPrefab;
@@ -14,6 +16,13 @@ public class GlobalOptions : MonoBehaviour
     public void SpawnEdgeMenu(){
         GameObject edgeMenu = (GameObject) Instantiate(edgeMenuPrefab,transform.position,transform.rotation);
         edgeMenu.GetComponent<Canvas>().worldCamera = Camera.main;
+    }
+
+    public void ReadNewNetwork(){
+        string path = EditorUtility.OpenFilePanel("Choose interaction file...","","sif");
+        NetworkBuilder n = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
+        n.BuildNetwork(path);
+        Destroy(gameObject);
     }
 
     public void QuitProgram(){

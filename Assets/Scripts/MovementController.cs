@@ -8,12 +8,14 @@ public class MovementController : MonoBehaviour
 {
     public XRController teleportRay;
     public GameObject optionsMenuPrefab;
-    public float activationThreshold = 0.25f;
-    public float scrollSpeed=7.5f;
+    
+    
     public bool movementActive=false;
+    private NetworkBuilder networkBuilder;
     private InputDevice rightController;
     private InputDevice leftController;
-    // Update is called once per frame
+    private float activationThreshold = 0.25f;
+    private float scrollSpeed=7.5f;
     void Start() {
         teleportRay.gameObject.SetActive(false);
         List<InputDevice> devices = new List<InputDevice>();
@@ -29,19 +31,33 @@ public class MovementController : MonoBehaviour
         if (devices.Count > 0){
             leftController=devices[0];
         }
+
+        networkBuilder = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
     }
 
     void Update()
     {
         if (movementActive){
+            //Controls up/down motion
             rightController.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 rightStickPos);
             if (rightStickPos.y > activationThreshold || rightStickPos.y < -activationThreshold){
                 transform.position=new Vector3(transform.position.x,transform.position.y+scrollSpeed*Time.deltaTime*rightStickPos.y,transform.position.z);
             }
 
+            //Controls teleport ray appearance/disappearance
             leftController.TryGetFeatureValue(CommonUsages.primary2DAxis, out Vector2 leftStickPos);
             teleportRay.gameObject.SetActive(leftStickPos.y > activationThreshold);
 
+            //Controls switching between network states
+            rightController.TryGetFeatureValue(CommonUsages.triggerButton, out bool forwardState);
+            leftController.TryGetFeatureValue(CommonUsages.triggerButton, out bool reverseState);
+            if (forwardState){
+                networkBuilder.ChangeState(true);
+            } else if (reverseState) {
+                networkBuilder.ChangeState(false);
+            }
+
+            //Controls opening the menu (press any button)
             bool buttonPressed=false;
             leftController.TryGetFeatureValue(CommonUsages.primaryButton, out buttonPressed);
             if (!buttonPressed){
@@ -59,6 +75,8 @@ public class MovementController : MonoBehaviour
                 Instantiate(optionsMenuPrefab,new Vector3(optPos.x,Camera.main.transform.position.y,optPos.z),Quaternion.Euler(0.0f,Camera.main.transform.rotation.eulerAngles.y,0.0f));
                 movementActive=false;
             }
+
+            
         }
     }
 }

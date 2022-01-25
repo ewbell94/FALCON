@@ -6,36 +6,43 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using Accord.Math.Decompositions;
 using Random=UnityEngine.Random;
 
 public class NetworkBuilder : MonoBehaviour
 {
-    public GameObject nodePrefab; //Prefab for the node object
-    public GameObject edgePrefab; //Prefab for the edge object
-    public GameObject labelPrefab; //Prefab for node labels
+    public GameObject nodePrefab;
+    public GameObject edgePrefab;
+    public GameObject labelPrefab; 
+    public GameObject nodeGroupPrefab; 
     
+    //Data structure for storing network states
     private struct Network{
         public string[] nodeNames;
-        public bool[,] edgeGraph;
+        public string[] nodeGroups;
+        public float[,] edgeGraph;
         public Vector3[] nodePositions;
     }
-    private List<Network> states=new List<Network>();
+
+    private int stateIndex = -1; //Index of the current network state in states
+    private List<Network> states=new List<Network>(); //List of all the loaded network states
+
+    //Given a SIF file, this function builds the network state and changes the viewer to that new state
     public void BuildNetwork(string filename){
-        (string[] nodeNames, bool[,] edgeGraph) = ReadSIF(filename);
+        (string[] nodeNames, float[,] edgeGraph) = ReadSIF(filename);
         float t0=Time.realtimeSinceStartup;
         Vector3[] nodePositions= GDCoords(edgeGraph);
         float t1=Time.realtimeSinceStartup;
         Debug.Log(t1-t0);
-        Network thisState=new Network(){nodeNames=nodeNames,edgeGraph=edgeGraph,nodePositions=nodePositions};
+        string[] nodeGroups = AssessNodeGrouping(nodeNames);
+        Network thisState=new Network(){nodeNames=nodeNames,nodeGroups=nodeGroups,edgeGraph=edgeGraph,nodePositions=nodePositions};
         states.Add(thisState);
-        DrawNetwork(nodePositions,edgeGraph,nodeNames);
+        ChangeState(true);
         MovementController xrMove= GameObject.Find("XR Rig").GetComponent<MovementController>();
         xrMove.movementActive=true;
     }
 
     //Given a SIF file, extract the node connectivity array and node names
-    private (string[],bool[,]) ReadSIF(string fname){
+    private (string[],float[,]) ReadSIF(string fname){
         Dictionary<string,List<string>> pairings = new Dictionary<string,List<string>>();
         string[] lines=File.ReadAllLines(fname);
         foreach (string line in lines){
@@ -61,17 +68,18 @@ public class NetworkBuilder : MonoBehaviour
             i++;
         }
 
-        bool[,] edgeGraph = new bool[nodeCount,nodeCount];
+        float[,] edgeGraph = new float[nodeCount,nodeCount];
         for(i=0;i<nodeCount;i++){
             foreach(string partner in pairings[nodeNames[i]]){
                 int j=Array.IndexOf(nodeNames,partner);
-                edgeGraph[i,j]=true;
+                edgeGraph[i,j]=0.1f;
             }
         }
         return (nodeNames,edgeGraph);
     }
     
-    private Vector3[] GDCoords(bool[,] edgeGraph){
+    //GDCoords uses adam optimization to calculate coordinates for all nodes given a network connectivity
+    private Vector3[] GDCoords(float[,] edgeGraph){
         int nodeCount=edgeGraph.GetLength(0);
         float d=2.0f; //Ideal internode distance
         float mu=1.0f; //Base learning rate
@@ -102,7 +110,7 @@ public class NetworkBuilder : MonoBehaviour
                     Vector3 pointi=coords[i];
                     float vecdist=Vector3.Distance(pointn,pointi);
                     grad-=2*(pointn-pointi)/Mathf.Pow(vecdist,4.0f);
-                    if (edgeGraph[n,i]){
+                    if (edgeGraph[n,i] > 0.0f){
                         float dterm=1.0f-d/vecdist;
                         grad+=2*k*(pointn-pointi)*dterm;
                     }
@@ -126,7 +134,7 @@ public class NetworkBuilder : MonoBehaviour
                     float vecdist=Vector3.Distance(coords[n],coords[i]);
                     nodeE[n]+=Mathf.Pow(Vector3.Distance(coords[n],center),2.0f)/nodeCount;
                     nodeE[n]+=1/Mathf.Pow(vecdist,2.0f);
-                    if (edgeGraph[n,i]){
+                    if (edgeGraph[n,i] > 0.0f){
                         nodeE[n]+=k*Mathf.Pow(vecdist-d,2.0f);
                     }
                 }
@@ -150,41 +158,8 @@ public class NetworkBuilder : MonoBehaviour
         }
         return com/coords.Length;
     }
-    //Given the adjacency matrix, calculate the laplacian and determine coordinates based on its principal components
-    /*
-    private Vector3[] PCACoords(bool[,] edgeGraph){
-        int nodeCount=edgeGraph.GetLength(0);
-        Vector3[] coords = new Vector3[nodeCount];
-        float[,] edgeLap = new float[nodeCount,nodeCount];
-        for (int i=0;i<nodeCount;i++){
-            float degree=0.0f;
-            for (int j=0;j<nodeCount;j++){
-                if (edgeGraph[i,j]){
-                    degree++;
-                    edgeLap[i,j]=-1.0f;
-                }
-            }
-            edgeLap[i,i]=degree;
-        }
-        SingularValueDecompositionF result= new SingularValueDecompositionF(edgeLap);
-        float[,] lsv=result.LeftSingularVectors;
-        float[] svals=result.Diagonal;
-        //Debug.Log(result.Ordering);
-        //Debug.Log(result.IsSingular);
-        
-        for (int i=0;i<nodeCount;i++){
-            float xval=svals[0]*lsv[i,0];
-            float yval=svals[1]*lsv[i,1];
-            float zval=svals[2]*lsv[i,2];
-            Vector3 point = new Vector3(svals[0]*lsv[i,0],svals[1]*lsv[i,1],svals[2]*lsv[i,2]);
-            coords[i]=point;
-        }
-
-        coords = RegularizeCoords(coords);
-        return coords;
-    }
-    */
-    //Given a set of coordinates, scale them to ensure node separation, raise them off the ground, and center them
+    
+    //Given a set of coordinates, scale them to ensure node separation and center them
     private Vector3[] RegularizeCoords(Vector3[] coords){
         float minDist=1.0f;
 
@@ -232,34 +207,122 @@ public class NetworkBuilder : MonoBehaviour
         return newCoords;
     }
 
-    //Given a set of node positions and node connectivity, instantiate all objects of the network
-    private void DrawNetwork(Vector3[] nodePositions, bool[,] edgeGraph, string[] nodeNames){
+    //Based on the network states in the state list, move forward one state or backward one state
+    public void ChangeState(bool forward){
+        if (forward){
+            if (stateIndex+1 >= states.Count){
+                return;
+            } else {
+                stateIndex++;
+            }
+        } else {
+            if (stateIndex-1 < 0){
+                return;
+            } else {
+                stateIndex--;
+            }
+        }
+
+        Network newState = states[stateIndex];
+        string[] nodeNames = newState.nodeNames;
+        float[,] edgeGraph = newState.edgeGraph;
+        Vector3[] nodePositions = newState.nodePositions;
+        
         GameObject[] newNodes= new GameObject[nodePositions.Length];
         Transform canvas=GameObject.Find("NodeLabelCanvas").transform;
         Transform edgeParent = GameObject.Find("Edges").transform;
-        Transform nodeParent = GameObject.Find("Nodes").transform;
+        Color oldColor;
+        if (edgeParent.childCount > 0){
+            oldColor = edgeParent.GetChild(0).gameObject.GetComponent<LineRenderer>().startColor;
+        } else {
+            oldColor = edgePrefab.GetComponent<LineRenderer>().startColor;
+        }
+        
+        foreach (Transform child in edgeParent) {
+            GameObject.Destroy(child.gameObject);
+        }
+        GameObject nodeParent = GameObject.Find("Nodes");
         for (int i=0; i<nodePositions.Length; i++){
-            newNodes[i]=(GameObject) Instantiate(nodePrefab,nodePositions[i],Quaternion.identity);
-            newNodes[i].transform.SetParent(nodeParent,true);
-            newNodes[i].name=nodeNames[i];
-            GameObject label = (GameObject) Instantiate(labelPrefab,Vector3.zero,Quaternion.identity);
-            label.name=nodeNames[i]+"_label";
-            Text t = label.GetComponent<Text>();
-            t.text=nodeNames[i];
-            TextMover tm = label.GetComponent<TextMover>();
-            tm.Target = newNodes[i].transform;
-            label.transform.SetParent(canvas,false);
-            
+            newNodes[i]=GameObject.Find(nodeNames[i]);
+            if (newNodes[i] == null){ //If the node is non-existent, create it
+                newNodes[i]=(GameObject) Instantiate(nodePrefab,nodePositions[i],Quaternion.identity);
+                if (nodeParent == null){
+                    nodeParent = (GameObject) Instantiate(nodeGroupPrefab,Vector3.zero,Quaternion.identity);
+                    nodeParent.name = "Nodes";
+                }
+                newNodes[i].transform.SetParent(nodeParent.transform,true);
+                newNodes[i].name=nodeNames[i];
+                GameObject label = (GameObject) Instantiate(labelPrefab,Vector3.zero,Quaternion.identity);
+                label.name=nodeNames[i]+"_label";
+                Text t = label.GetComponent<Text>();
+                t.text=nodeNames[i];
+                TextMover tm = label.GetComponent<TextMover>();
+                tm.Target = newNodes[i].transform;
+                label.transform.SetParent(canvas,false);
+            } else {
+                int oldStateIndex;
+                if (forward){
+                    oldStateIndex = stateIndex - 1;
+                } else {
+                    oldStateIndex = stateIndex + 1;
+                }
+                int nodeIndex = Array.IndexOf(states[oldStateIndex].nodeNames,nodeNames[i]);
+                states[oldStateIndex].nodePositions[nodeIndex] = newNodes[i].transform.position;
+
+                newNodes[i].transform.position = nodePositions[i];
+            }
+
             for (int j=0; j<i; j++){
-                if (edgeGraph[i,j]){
+                if (edgeGraph[i,j] > 0.0f){
                     GameObject newEdge = (GameObject) Instantiate(edgePrefab,Vector3.zero,Quaternion.identity);
                     newEdge.transform.SetParent(edgeParent,true);
                     EdgeConnector newEdgeConnector = newEdge.GetComponent<EdgeConnector>();
                     newEdgeConnector.NodeA = newNodes[i];
                     newEdgeConnector.NodeB = newNodes[j];
+                    LineRenderer lr = newEdge.GetComponent<LineRenderer>();
+                    lr.startColor = oldColor;
+                    lr.endColor = oldColor;
+                    lr.startWidth = edgeGraph[i,j];
+                    lr.endWidth = edgeGraph[i,j];
                 }
             }
         }
     }
     
+    //If the node names/groupings are changed in NodeOptions, this is called to change them in the state list
+    public void SetNodeNames(string[] oldNames, string[] newNames, string[] newGroups){
+        for (int i = 0; i < oldNames.Length; i++){
+            foreach (Network state in states){
+                int nodeIndex = Array.IndexOf(state.nodeNames,oldNames[i]);
+                state.nodeNames[nodeIndex] = newNames[i];
+                state.nodeGroups[nodeIndex] = newGroups[i];
+            }
+        }
+    }
+
+    //If the edge weights are changed in EdgeOptions, this is called to change them in the state list
+    public void SetEdgeWeights(string[] nodesA, string[] nodesB, float[] weights){
+        return;
+    }
+
+    //Returns a node group array for BuildNetwork to create its network state
+    private string[] AssessNodeGrouping(string[] nodeNames){
+        string[] nodeGroups = new string[nodeNames.Length];
+        if (stateIndex >= 0){
+            for (int i = 0; i<nodeGroups.Length; i++){
+                int nodeIndex = Array.IndexOf(states[stateIndex].nodeNames,nodeNames[i]);
+                if (nodeIndex >= 0){
+                    nodeGroups[i] = states[stateIndex].nodeGroups[nodeIndex];
+                } else {
+                    nodeGroups[i] = "Nodes";
+                }
+            }
+        } else {
+            for (int i = 0; i<nodeGroups.Length; i++){
+                nodeGroups[i]="Nodes";
+            }
+        }
+
+        return nodeGroups;
+    }
 }

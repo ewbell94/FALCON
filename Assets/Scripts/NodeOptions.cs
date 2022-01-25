@@ -13,19 +13,22 @@ public class NodeOptions : MonoBehaviour
     public GameObject nodeRowPrefab;
     private GameObject optionsMenu;
     private GameObject colorPicker;
-    private List<InputField> nodeGroupRowFields = new List<InputField>();
-    private List<Dropdown> nodeRowDrops = new List<Dropdown>();
-    private List<Text> nodeRowNames = new List<Text>();
-    private List<GameObject> allNodes = new List<GameObject>();
-    private List<GameObject> allNodeGroups;
-    private GameObject nodeGroupViewerContent;
-    private GameObject nodeListViewerContent;
-    private float updateWhen;
-    private float updateInterval = 0.5f;
+    private NetworkBuilder networkBuilder; //Needed for calling SetNodeNames
+    private List<InputField> nodeGroupRowFields = new List<InputField>(); //All entry fields for node group names
+    private List<Dropdown> nodeRowDrops = new List<Dropdown>(); //All dropdown menus for individual nodes
+    private List<Text> nodeRowNames = new List<Text>(); //All text fields for node names
+    private List<GameObject> allNodes = new List<GameObject>(); //All node objects present in the network
+    private List<GameObject> allNodeGroups; //All node groups present in the network
+    private GameObject nodeGroupViewerContent; //The viewport for the node groups panel
+    private GameObject nodeListViewerContent; //The viewport for the individual nodes panel
+    private float updateWhen; //Used for updating less frequently than the Update loop
+    private float updateInterval = 0.5f; //Time separation between updates
 
+    //Called on menu instantiation
     void Start(){
         updateWhen=Time.fixedTime+updateInterval;
         optionsMenu = GameObject.Find("OptionsMenu(Clone)");
+        networkBuilder = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
         colorPicker = transform.Find("FlexibleColorPicker").gameObject;
         optionsMenu.SetActive(false);
         float nodeScale = -1.0f;
@@ -76,7 +79,10 @@ public class NodeOptions : MonoBehaviour
         }
     }
  
+    //Called every frame
     void FixedUpdate(){
+
+        //If the node group names are changed, update all the dropdown menus
         if (Time.fixedTime >= updateWhen){
             List<string> nodeGroupNames = new List<string>();
             foreach (InputField nodeGroupRowField in nodeGroupRowFields){
@@ -97,6 +103,7 @@ public class NodeOptions : MonoBehaviour
         }
     }
 
+    //When "new group" is pressed, this function adds in a new group to the window
     public void SpawnNewGroupRow(){
         RectTransform rt = nodeGroupViewerContent.GetComponent<RectTransform>();
         GameObject newGroupRow = (GameObject) Instantiate(nodeGroupRowPrefab,Vector3.zero,Quaternion.identity);
@@ -110,6 +117,7 @@ public class NodeOptions : MonoBehaviour
         nodeGroupRowFields.Add(inpf);
     }
 
+    //Opens a CSV file full of "oldName,newName" lines and renames the nodes in the window accordingly
     public void RenameNodesButton(){
         string path = EditorUtility.OpenFilePanel("Choose new name CSV...","","csv");
         string[] lines=File.ReadAllLines(path);
@@ -129,6 +137,7 @@ public class NodeOptions : MonoBehaviour
         } 
     }
 
+    //Opens and closes the color picker when clicked
     public void ColorPicker(GameObject button){
         if (colorPicker.transform.localScale.x == 0.0f){
             colorPicker.transform.SetParent(button.transform);
@@ -141,19 +150,23 @@ public class NodeOptions : MonoBehaviour
         }
     }
 
+    //Discards all changes through the "cancel" button
     public void Cancel(){
         optionsMenu.SetActive(true);
         Destroy(gameObject);
     }
 
+    //Data structure to group together the parameters for each node group
     struct NodeGroupParams{
         public bool labelActive;
         public Color nodeColor;
         
     }
 
+    //Applies changes made to the nodes/node groups to the scene
     public void ApplyChanges(){
         float nodeScale = transform.Find("NodeSizeSlider/Slider").gameObject.GetComponent<Slider>().value;
+        //Pull node group parameters from node group window and create any new needed groups
         List<NodeGroupParams> nodeGroupParamList = new List<NodeGroupParams>();
         for (int i = 0; i<nodeGroupViewerContent.transform.childCount; i++){
             Transform nodeGroupRow = nodeGroupViewerContent.transform.GetChild(i);
@@ -171,10 +184,16 @@ public class NodeOptions : MonoBehaviour
             }
         }
 
+        //Apply changes to each individual node according to their node group parameters and changes in the node window
+        string[] oldNames = new string[allNodes.Count];
+        string[] newNames = new string[allNodes.Count];
+        string[] newGroups = new string[allNodes.Count];
+
         for (int i = 0; i<allNodes.Count; i++){
             GameObject node = allNodes[i];
             node.transform.localScale = new Vector3(nodeScale,nodeScale,nodeScale);
             string originalName = node.name;
+            oldNames[i] = originalName;
             GameObject label = GameObject.Find(originalName+"_label");
             string newName = nodeRowNames[i].text;
             if (originalName != newName){
@@ -185,13 +204,15 @@ public class NodeOptions : MonoBehaviour
                     }
                     newName = newName+"_"+n.ToString();
                 }
-                node.name=newName;
+                node.name = newName;
                 label.name = newName+"_label";
                 label.GetComponent<Text>().text = newName;
             }
+            newNames[i] = newName;
 
             int stateIndex = nodeRowDrops[i].value;
             node.transform.SetParent(allNodeGroups[stateIndex].transform);
+            newGroups[i] = allNodeGroups[stateIndex].name;
             NodeGroupParams ngp = nodeGroupParamList[stateIndex];
 
             if (ngp.labelActive){
@@ -209,13 +230,15 @@ public class NodeOptions : MonoBehaviour
                 renderer.material = newMaterial;
             }
         }
+        networkBuilder.SetNodeNames(oldNames, newNames, newGroups); //changes node names/groups in the state list
 
+        //Get rid of any empty node groups
         foreach(GameObject nodeG in allNodeGroups){
             if (nodeG.transform.childCount == 0){
                 Destroy(nodeG);
             }
         }
-
+        
         optionsMenu.SetActive(true);
         Destroy(gameObject);
     }

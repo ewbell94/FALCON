@@ -6,15 +6,16 @@ public class EdgeConnector : MonoBehaviour
 {
     public GameObject NodeA;
     public GameObject NodeB;
+    private LineRenderer line;
     // Start is called before the first frame update
     void Start()
     {
-        Vector3 startPoint=NodeA.transform.position;
-        Vector3 endPoint=NodeB.transform.position;
-
-        LineRenderer line = GetComponent<LineRenderer>();
-        line.SetPosition(0,startPoint);
-        line.SetPosition(1,endPoint);
+        line = GetComponent<LineRenderer>();   
         line.material.renderQueue=2999;
+    }
+
+    void Update(){
+        line.SetPosition(0,NodeA.transform.position);
+        line.SetPosition(1,NodeB.transform.position);
     }
 }
