@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
 using SimpleFileBrowser;
 
 public class FileLoader : MonoBehaviour
 {
-    public GameObject fileBrowserPrefab;
     /*
     void Start(){
         LoadExample();
@@ -51,16 +49,13 @@ public class FileLoader : MonoBehaviour
     */
     public void OpenSIF(){
         NetworkBuilder n = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
-        string path = EditorUtility.OpenFilePanel("Choose interaction file...","","sif");
-        n.BuildNetwork(path);
-        /*
-        GameObject fBrowser = (GameObject) Instantiate(fileBrowserPrefab,transform.position,Quaternion.identity);
-        Canvas c = fBrowser.GetComponent<Canvas>();
-        c.renderMode = RenderMode.WorldSpace;
-        c.worldCamera = Camera.main;
-        FileBrowser.ShowLoadDialog((paths) => {n.BuildNetwork(paths[0]);},() => {Debug.Log("Canceled");},FileBrowser.PickMode.Files,false,"Choose interaction file...","Select");
-        */
-        Destroy(gameObject);
+        //string path = EditorUtility.OpenFilePanel("Choose interaction file...","","sif");
+        //n.BuildNetwork(path);
+        FileBrowserSpawner fbs = GameObject.Find("FileBrowserSpawner").GetComponent<FileBrowserSpawner>();
+        fbs.SpawnLoader((paths)=>{n.BuildNetwork(paths[0]); Destroy(gameObject);},
+                        ()=>{gameObject.SetActive(true);},
+                        "Choose interaction file...",".sif",transform.position,transform.rotation);
+        gameObject.SetActive(false);
     }
 
     public void LoadExample(){

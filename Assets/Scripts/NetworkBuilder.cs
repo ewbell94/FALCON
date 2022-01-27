@@ -222,7 +222,9 @@ public class NetworkBuilder : MonoBehaviour
                 stateIndex--;
             }
         }
-
+        if (states.Count > 1){
+            GameObject.Find("LogPrompt").GetComponent<LogPrompt>().SetText("State "+(stateIndex+1).ToString()+"/"+states.Count.ToString(), Color.green, 0.5f);
+        }
         Network newState = states[stateIndex];
         string[] nodeNames = newState.nodeNames;
         float[,] edgeGraph = newState.edgeGraph;
@@ -302,7 +304,12 @@ public class NetworkBuilder : MonoBehaviour
 
     //If the edge weights are changed in EdgeOptions, this is called to change them in the state list
     public void SetEdgeWeights(string[] nodesA, string[] nodesB, float[] weights){
-        return;
+        for (int i = 0; i<weights.Length; i++){
+            int nodeAIndex = Array.IndexOf(states[stateIndex].nodeNames,nodesA[i]);
+            int nodeBIndex = Array.IndexOf(states[stateIndex].nodeNames,nodesB[i]);
+            states[stateIndex].edgeGraph[nodeAIndex,nodeBIndex] = weights[i];
+            states[stateIndex].edgeGraph[nodeBIndex,nodeAIndex] = weights[i];
+        }
     }
 
     //Returns a node group array for BuildNetwork to create its network state

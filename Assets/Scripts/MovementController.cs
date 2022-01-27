@@ -16,6 +16,7 @@ public class MovementController : MonoBehaviour
     private InputDevice leftController;
     private float activationThreshold = 0.25f;
     private float scrollSpeed=7.5f;
+    private bool alreadyChanged = false;
     void Start() {
         teleportRay.gameObject.SetActive(false);
         List<InputDevice> devices = new List<InputDevice>();
@@ -52,9 +53,17 @@ public class MovementController : MonoBehaviour
             rightController.TryGetFeatureValue(CommonUsages.triggerButton, out bool forwardState);
             leftController.TryGetFeatureValue(CommonUsages.triggerButton, out bool reverseState);
             if (forwardState){
-                networkBuilder.ChangeState(true);
+                if (!alreadyChanged){
+                    networkBuilder.ChangeState(true);
+                    alreadyChanged = true;
+                }
             } else if (reverseState) {
-                networkBuilder.ChangeState(false);
+                if (!alreadyChanged){
+                    networkBuilder.ChangeState(false);
+                    alreadyChanged = true;
+                }
+            } else {
+                alreadyChanged = false;
             }
 
             //Controls opening the menu (press any button)

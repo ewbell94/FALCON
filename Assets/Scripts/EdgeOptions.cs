@@ -4,7 +4,6 @@ using System.IO;
 using System;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
 
 public class EdgeOptions : MonoBehaviour
 {
@@ -36,7 +35,15 @@ public class EdgeOptions : MonoBehaviour
     }
 
     public void WeightEdgesButton(){
-        string path = EditorUtility.OpenFilePanel("Choose weight edges CSV...","","csv");
+        FileBrowserSpawner fbs = GameObject.Find("FileBrowserSpawner").GetComponent<FileBrowserSpawner>();
+        fbs.SpawnLoader((paths)=>{WeightEdges(paths[0]); gameObject.SetActive(true);},
+                        ()=>{gameObject.SetActive(true);},
+                        "Choose weight edges CSV...",".csv",transform.position,transform.rotation);
+        gameObject.SetActive(false);
+    }
+
+    private void WeightEdges(string path){
+        edgeWeights = new Dictionary<string, float>(); //If the file is opened again without applying, clean out the old weights
         string[] lines=File.ReadAllLines(path);
         List<float> weights = new List<float>();
         List<string> chainPairs = new List<string>();
@@ -83,6 +90,12 @@ public class EdgeOptions : MonoBehaviour
 
     public void ApplyChanges(){
         Color finalColor = transform.Find("EdgeColorPart/Button").gameObject.GetComponent<Image>().color;
+        int edgeCount = GameObject.Find("Edges").transform.childCount;
+        string[] nodesA = new string[edgeCount];
+        string[] nodesB = new string[edgeCount];
+        float[] weights = new float[edgeCount];
+        int i = 0;
+
         foreach (Transform edgeT in GameObject.Find("Edges").transform){
             GameObject edge = edgeT.gameObject;
             LineRenderer lr = edge.GetComponent<LineRenderer>();
@@ -90,17 +103,25 @@ public class EdgeOptions : MonoBehaviour
             lr.endColor = finalColor;
             if (edgeWeights.Count > 0){
                 EdgeConnector ec = edge.GetComponent<EdgeConnector>();
+                nodesA[i] = ec.NodeA.name;
+                nodesB[i] = ec.NodeB.name;
                 if (edgeWeights.ContainsKey(ec.NodeA.name + "," + ec.NodeB.name)){
                     float width=edgeWeights[ec.NodeA.name+","+ec.NodeB.name];
                     lr.startWidth=width;
                     lr.endWidth=width;
+                    weights[i] = width;
                 } else {
                     lr.startWidth=0.1f;
                     lr.endWidth=0.1f;
+                    weights[i] = 0.1f;
                 }
+                i++;
             }
         }
 
+        if (i > 0){
+            GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>().SetEdgeWeights(nodesA, nodesB, weights);
+        }
         optionsMenu.SetActive(true);
         Destroy(gameObject);
     }

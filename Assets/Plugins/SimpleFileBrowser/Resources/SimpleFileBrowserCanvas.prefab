@@ -576,11 +576,11 @@ GameObject:
   m_Component:
   - component: {fileID: 224000014068651142}
   - component: {fileID: 223383913520683742}
-  - component: {fileID: 114369654339803456}
   - component: {fileID: 114000011744356224}
   - component: {fileID: 222000012900979236}
   - component: {fileID: 114000013452696640}
   - component: {fileID: 114985255881820402}
+  - component: {fileID: 5303577321909656754}
   m_Layer: 5
   m_Name: Files
   m_TagString: Untagged
@@ -630,23 +630,6 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &114369654339803456
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1000010629955072}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &114000011744356224
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -730,6 +713,25 @@ MonoBehaviour:
   fileBrowser: {fileID: 114000013689746302}
   viewportTransform: {fileID: 224000010015050490}
   contentTransform: {fileID: 224000012931849942}
+--- !u!114 &5303577321909656754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000010629955072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7951c64acb0fa62458bf30a60089fe2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreReversedGraphics: 0
+  m_CheckFor2DOcclusion: 0
+  m_CheckFor3DOcclusion: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RaycastTriggerInteraction: 1
 --- !u!1 &1000010633767952
 GameObject:
   m_ObjectHideFlags: 0
@@ -2341,7 +2343,7 @@ Canvas:
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
   m_SortingLayerID: 0
-  m_SortingOrder: 2016
+  m_SortingOrder: 0
   m_TargetDisplay: 0
 --- !u!114 &114000011218353566
 MonoBehaviour:

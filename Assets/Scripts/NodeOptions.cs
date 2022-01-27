@@ -119,7 +119,14 @@ public class NodeOptions : MonoBehaviour
 
     //Opens a CSV file full of "oldName,newName" lines and renames the nodes in the window accordingly
     public void RenameNodesButton(){
-        string path = EditorUtility.OpenFilePanel("Choose new name CSV...","","csv");
+        FileBrowserSpawner fbs = GameObject.Find("FileBrowserSpawner").GetComponent<FileBrowserSpawner>();
+        fbs.SpawnLoader((paths)=>{RenameNodes(paths[0]); gameObject.SetActive(true);},
+                        ()=>{gameObject.SetActive(true);},
+                        "Choose new name CSV...",".csv",transform.position,transform.rotation);
+        gameObject.SetActive(false);
+    }
+
+    private void RenameNodes(string path){
         string[] lines=File.ReadAllLines(path);
         Dictionary<string,string> nameDict = new Dictionary<string,string>();
         foreach(string line in lines){
@@ -129,12 +136,19 @@ public class NodeOptions : MonoBehaviour
             nameDict[parts[0]]=parts[1];
         }
 
+        bool showDialog = false;
         foreach(Text name in nodeRowNames){
             string nameText = name.text;
             if (nameDict.ContainsKey(nameText)){
                 name.text = nameDict[nameText];
+            } else {
+                showDialog = true;
             }
-        } 
+        }
+
+        if (showDialog){
+            GameObject.Find("LogPrompt").GetComponent<LogPrompt>().SetText("WARNING: Nodes in the name file were not found in the network!", Color.red, 5.0f);
+        }
     }
 
     //Opens and closes the color picker when clicked

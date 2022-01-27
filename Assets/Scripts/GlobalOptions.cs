@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEditor;
 
 public class GlobalOptions : MonoBehaviour
 {
@@ -19,10 +18,13 @@ public class GlobalOptions : MonoBehaviour
     }
 
     public void ReadNewNetwork(){
-        string path = EditorUtility.OpenFilePanel("Choose interaction file...","","sif");
+        //string path = EditorUtility.OpenFilePanel("Choose interaction file...","","sif");
         NetworkBuilder n = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
-        n.BuildNetwork(path);
-        Destroy(gameObject);
+        FileBrowserSpawner fbs = GameObject.Find("FileBrowserSpawner").GetComponent<FileBrowserSpawner>();
+        fbs.SpawnLoader((paths)=>{n.BuildNetwork(paths[0]); Destroy(gameObject);},
+                        ()=>{gameObject.SetActive(true);},
+                        "Choose interaction file...",".sif",transform.position,transform.rotation);
+        gameObject.SetActive(false);
     }
 
     public void QuitProgram(){
