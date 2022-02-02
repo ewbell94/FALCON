@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/VRScene.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 0
+    path: Assets/Scenes/MKScene.unity
+    guid: 593e4403006a9cd479784fcfa02fbb6f
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260,
       type: 2}
@@ -16,4 +19,6 @@ EditorBuildSettings:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 1a4c68ca72a83449f938d669337cb305,
       type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 2050bd9a61a48d747954ba0909ef345a,
+      type: 2}
+    xr.sdk.mock-hmd.settings: {fileID: 11400000, guid: 313e7013b9fc8e34abfe6fd47f9853ad,
       type: 2}

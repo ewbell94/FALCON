@@ -25,19 +25,29 @@ public class NetworkBuilder : MonoBehaviour
 
     private int stateIndex = -1; //Index of the current network state in states
     private List<Network> states=new List<Network>(); //List of all the loaded network states
+    private LogPrompt lp;
+
+    void Start(){
+        lp = GameObject.Find("LogPrompt").GetComponent<LogPrompt>();
+    }
 
     //Given a SIF file, this function builds the network state and changes the viewer to that new state
     public void BuildNetwork(string filename){
         (string[] nodeNames, float[,] edgeGraph) = ReadSIF(filename);
         float t0=Time.realtimeSinceStartup;
+        string[] nodeGroups = AssessNodeGrouping(nodeNames);
+        MovementController xrMove= GameObject.Find("XR Rig").GetComponent<MovementController>();
+        if (nodeGroups == null){
+            lp.SetText("ERROR: loaded state has nodes not present in the current network.", Color.red, 5.0f);
+            xrMove.movementActive=true;
+            return;
+        }
         Vector3[] nodePositions= GDCoords(edgeGraph);
         float t1=Time.realtimeSinceStartup;
         Debug.Log(t1-t0);
-        string[] nodeGroups = AssessNodeGrouping(nodeNames);
         Network thisState=new Network(){nodeNames=nodeNames,nodeGroups=nodeGroups,edgeGraph=edgeGraph,nodePositions=nodePositions};
         states.Add(thisState);
         ChangeState(true);
-        MovementController xrMove= GameObject.Find("XR Rig").GetComponent<MovementController>();
         xrMove.movementActive=true;
     }
 
@@ -223,7 +233,7 @@ public class NetworkBuilder : MonoBehaviour
             }
         }
         if (states.Count > 1){
-            GameObject.Find("LogPrompt").GetComponent<LogPrompt>().SetText("State "+(stateIndex+1).ToString()+"/"+states.Count.ToString(), Color.green, 0.5f);
+            lp.SetText("State "+(stateIndex+1).ToString()+"/"+states.Count.ToString(), Color.green, 0.5f);
         }
         Network newState = states[stateIndex];
         string[] nodeNames = newState.nodeNames;
@@ -321,7 +331,8 @@ public class NetworkBuilder : MonoBehaviour
                 if (nodeIndex >= 0){
                     nodeGroups[i] = states[stateIndex].nodeGroups[nodeIndex];
                 } else {
-                    nodeGroups[i] = "Nodes";
+                    return null;
+                    //nodeGroups[i] = "Nodes";
                 }
             }
         } else {

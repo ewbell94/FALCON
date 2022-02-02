@@ -47,12 +47,32 @@ public class EdgeOptions : MonoBehaviour
         string[] lines=File.ReadAllLines(path);
         List<float> weights = new List<float>();
         List<string> chainPairs = new List<string>();
+        List<string> nodeNames = new List<string>();
+        bool showDialog = false;
         float minWeight = Single.PositiveInfinity;
         float maxWeight = Single.NegativeInfinity;
         foreach(string line in lines){
             string cleanline=line.Trim('\n');
             string[] parts=cleanline.Split(',');
             string[] chains=parts[0].Split('-');
+            if (!showDialog){
+                if (nodeNames.IndexOf(chains[0]) < 0){
+                    if (GameObject.Find(chains[0]) != null){
+                        nodeNames.Add(chains[0]);
+                    } else {
+                        showDialog = true;
+                    }
+                }
+
+                if (nodeNames.IndexOf(chains[1]) < 0){
+                    if (GameObject.Find(chains[1]) != null){
+                        nodeNames.Add(chains[1]);
+                    } else {
+                        showDialog = true;
+                    }
+                }
+            }
+            
             float weight = float.Parse(parts[1]);
             if (weight < minWeight){
                 minWeight = weight;
@@ -66,6 +86,10 @@ public class EdgeOptions : MonoBehaviour
             weights.Add(weight);
         }
         
+        if (showDialog){
+            GameObject.Find("LogPrompt").GetComponent<LogPrompt>().SetText("WARNING: Nodes in the weight file were not found in the network!", Color.red, 5.0f);
+        }
+
         float m;
         float b;
         

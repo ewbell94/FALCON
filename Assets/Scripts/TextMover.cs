@@ -17,7 +17,7 @@ public class TextMover : MonoBehaviour
         parent=transform.parent.GetComponent<RectTransform>();
     }
     
-    void OnGUI(){
+    void Update(){
         rt.sizeDelta = new Vector2(parent.sizeDelta.x,parent.sizeDelta.y);
         if (transform.position.x < float.MaxValue){
             Vector3 screenPoint = Camera.main.WorldToScreenPoint(Target.position);
