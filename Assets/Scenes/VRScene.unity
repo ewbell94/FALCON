@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 3
   m_SubtractiveShadowColor: {r: 0, g: 0, b: 0, a: 1}
-  m_SkyboxMaterial: {fileID: 2100000, guid: 4eed8c99ba2b192409f73911044cd033, type: 2}
+  m_SkyboxMaterial: {fileID: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 1606345891}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -887,8 +887,8 @@ GameObject:
   - component: {fileID: 473819240}
   - component: {fileID: 473819243}
   - component: {fileID: 473819242}
-  - component: {fileID: 473819244}
   - component: {fileID: 473819245}
+  - component: {fileID: 473819244}
   m_Layer: 0
   m_Name: XR Rig
   m_TagString: Untagged
@@ -967,13 +967,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 473819239}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 10b314f2aa400f84d9b6e0defe0f47b5, type: 3}
+  m_Script: {fileID: 11500000, guid: ee356b2cf630e704d8daa6159595046d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  movementActive: 0
   teleportRay: {fileID: 290843618}
   optionsMenuPrefab: {fileID: 4983928692539252351, guid: 91061a2e14312954ca1ce48f7c1573fc,
     type: 3}
-  movementActive: 0
 --- !u!114 &473819245
 MonoBehaviour:
   m_ObjectHideFlags: 0

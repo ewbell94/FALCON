@@ -34,21 +34,31 @@ public class NetworkBuilder : MonoBehaviour
     //Given a SIF file, this function builds the network state and changes the viewer to that new state
     public void BuildNetwork(string filename){
         (string[] nodeNames, float[,] edgeGraph) = ReadSIF(filename);
-        float t0=Time.realtimeSinceStartup;
-        string[] nodeGroups = AssessNodeGrouping(nodeNames);
-        MovementController xrMove= GameObject.Find("XR Rig").GetComponent<MovementController>();
-        if (nodeGroups == null){
-            lp.SetText("ERROR: loaded state has nodes not present in the current network.", Color.red, 5.0f);
-            xrMove.movementActive=true;
+
+        MovementController move;
+        if (GameObject.Find("XR Rig") != null){
+            move = GameObject.Find("XR Rig").GetComponent<MovementControllerVR>();
+        } else {
+            move = GameObject.Find("FPSController").GetComponent<MovementControllerMK>();
+        }
+        if (stateIndex >= 0 && nodeNames.Length != states[stateIndex].nodeNames.Length){
+            if (nodeNames.Length < states[stateIndex].nodeNames.Length){
+                lp.SetText("ERROR: loaded state does not have all nodes of the current network.", Color.red, 5.0f);
+            } else {
+                lp.SetText("ERROR: loaded state has nodes not present in the current network.", Color.red, 5.0f);
+            }
+            move.movementActive=true;
             return;
         }
+        float t0=Time.realtimeSinceStartup;
+        string[] nodeGroups = AssessNodeGrouping(nodeNames);
         Vector3[] nodePositions= GDCoords(edgeGraph);
         float t1=Time.realtimeSinceStartup;
         Debug.Log(t1-t0);
         Network thisState=new Network(){nodeNames=nodeNames,nodeGroups=nodeGroups,edgeGraph=edgeGraph,nodePositions=nodePositions};
         states.Add(thisState);
         ChangeState(true);
-        xrMove.movementActive=true;
+        move.movementActive=true;
     }
 
     //Given a SIF file, extract the node connectivity array and node names

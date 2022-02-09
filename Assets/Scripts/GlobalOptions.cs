@@ -7,14 +7,29 @@ public class GlobalOptions : MonoBehaviour
 {
     public GameObject nodeMenuPrefab;
     public GameObject edgeMenuPrefab;
+    private MKUIWrapper uiWrapper = null;
+
+    void Start() {
+        GameObject fpsController = GameObject.Find("FPSController");
+        if (fpsController != null){
+            uiWrapper = fpsController.GetComponent<MKUIWrapper>();
+        }
+    }
+
     public void SpawnNodeMenu(){
         GameObject nodeMenu = (GameObject) Instantiate(nodeMenuPrefab,transform.position,transform.rotation);
         nodeMenu.GetComponent<Canvas>().worldCamera = Camera.main;
+        if (uiWrapper != null){
+            uiWrapper.WrapUI(nodeMenu);
+        }
     }
 
     public void SpawnEdgeMenu(){
         GameObject edgeMenu = (GameObject) Instantiate(edgeMenuPrefab,transform.position,transform.rotation);
         edgeMenu.GetComponent<Canvas>().worldCamera = Camera.main;
+        if (uiWrapper != null){
+            uiWrapper.WrapUI(edgeMenu);
+        }
     }
 
     public void ReadNewNetwork(){
@@ -36,8 +51,13 @@ public class GlobalOptions : MonoBehaviour
     }
 
     public void CloseOptions(){
-        MovementController xrMove= GameObject.Find("XR Rig").GetComponent<MovementController>();
-        xrMove.movementActive=true;
+        MovementController move;
+        if (GameObject.Find("XR Rig") != null){
+            move = GameObject.Find("XR Rig").GetComponent<MovementControllerVR>();
+        } else {
+            move = GameObject.Find("FPSController").GetComponent<MovementControllerMK>();
+        }
+        move.movementActive=true;
         Destroy(gameObject);
     }
 }
