@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+//Behavior for the options menu
 public class GlobalOptions : MonoBehaviour
 {
     public GameObject nodeMenuPrefab;
@@ -11,7 +12,7 @@ public class GlobalOptions : MonoBehaviour
 
     void Start() {
         GameObject fpsController = GameObject.Find("FPSController");
-        if (fpsController != null){
+        if (fpsController != null){  //This will be null in VR mode
             uiWrapper = fpsController.GetComponent<MKUIWrapper>();
         }
     }
@@ -32,8 +33,8 @@ public class GlobalOptions : MonoBehaviour
         }
     }
 
+    //Loads in a new network state in SIF format
     public void ReadNewNetwork(){
-        //string path = EditorUtility.OpenFilePanel("Choose interaction file...","","sif");
         NetworkBuilder n = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
         FileBrowserSpawner fbs = GameObject.Find("FileBrowserSpawner").GetComponent<FileBrowserSpawner>();
         fbs.SpawnLoader((paths)=>{n.BuildNetwork(paths[0]); Destroy(gameObject);},
@@ -50,6 +51,7 @@ public class GlobalOptions : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    //Closes the options menu and gives control back to the player controller
     public void CloseOptions(){
         MovementController move;
         if (GameObject.Find("XR Rig") != null){

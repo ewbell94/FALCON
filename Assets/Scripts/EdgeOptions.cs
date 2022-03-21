@@ -5,14 +5,15 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Behavior for the edge configuration menu
 public class EdgeOptions : MonoBehaviour
 {
     private GameObject colorPicker;
-    private GameObject optionsMenu;
-    private float minWidth = 0.01f;
-    private float maxWidth = 0.5f;
+    private GameObject optionsMenu; //For reactivation after the options menu gets deactivated
+    private float minWidth = 0.01f; //Lower bound for edge weighting
+    private float maxWidth = 0.5f; //Upper bound for edge weighting
     private Dictionary<string,float> edgeWeights;
-    // Start is called before the first frame update
+
     void Start(){
         colorPicker = transform.Find("FlexibleColorPicker").gameObject;
         optionsMenu = GameObject.Find("OptionsMenu(Clone)");
@@ -22,6 +23,7 @@ public class EdgeOptions : MonoBehaviour
         edgeWeights = new Dictionary<string, float>();
     }
 
+    //Behavior for the color picker button
     public void ColorPicker(GameObject button){
         if (colorPicker.transform.localScale.x == 0.0f){
             colorPicker.transform.SetParent(button.transform);
@@ -34,6 +36,7 @@ public class EdgeOptions : MonoBehaviour
         }
     }
 
+    //Button for weighting edges
     public void WeightEdgesButton(){
         FileBrowserSpawner fbs = GameObject.Find("FileBrowserSpawner").GetComponent<FileBrowserSpawner>();
         fbs.SpawnLoader((paths)=>{WeightEdges(paths[0]); gameObject.SetActive(true);},
@@ -42,8 +45,10 @@ public class EdgeOptions : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    //Behavior for weighting edges based on a CSV once a filename is given
+    //CSV format is expected to be lines of "protA-protB,score"
     private void WeightEdges(string path){
-        edgeWeights = new Dictionary<string, float>(); //If the file is opened again without applying, clean out the old weights
+        edgeWeights = new Dictionary<string, float>(); //If a file is opened again without applying, clean out the old weights
         string[] lines=File.ReadAllLines(path);
         List<float> weights = new List<float>();
         List<string> chainPairs = new List<string>();
@@ -112,6 +117,7 @@ public class EdgeOptions : MonoBehaviour
         Destroy(gameObject);
     }
 
+    //Apply all changes made in the menu to the scene
     public void ApplyChanges(){
         Color finalColor = transform.Find("EdgeColorPart/Button").gameObject.GetComponent<Image>().color;
         int edgeCount = GameObject.Find("Edges").transform.childCount;

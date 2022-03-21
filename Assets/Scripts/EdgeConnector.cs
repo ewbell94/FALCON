@@ -2,16 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Ensures that edges stay connected even when nodes are moved
 public class EdgeConnector : MonoBehaviour
 {
     public GameObject NodeA;
     public GameObject NodeB;
     private LineRenderer line;
-    // Start is called before the first frame update
+
     void Start()
     {
         line = GetComponent<LineRenderer>();   
-        line.material.renderQueue=2999;
+        line.material.renderQueue=2999;  //Ensures that edges don't overlap the UI
     }
 
     void Update(){

@@ -4,11 +4,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Controls the behavior of node labels so that they attach themselves to the
 public class TextMover : MonoBehaviour
 {
     public Transform Target;
-    private int[] sizeBounds={12,150};
-    private float moveCoef=33.0f;
+    private int[] sizeBounds={12,150}; //These are in font size pts, I really wish I could do scale but that breaks the positioning
+    private float moveCoef=33.0f; //How long it takes for the label to move to the node from its previous spot i.e. "smoothing"
     private RectTransform rt;
     private RectTransform parent;
 
@@ -18,13 +19,13 @@ public class TextMover : MonoBehaviour
     }
     
     void Update(){
-        rt.sizeDelta = new Vector2(parent.sizeDelta.x,parent.sizeDelta.y);
+        rt.sizeDelta = new Vector2(parent.sizeDelta.x,parent.sizeDelta.y); //Unfortunately the parent isn't ready at Start so we have to do this in Update
         if (transform.position.x < float.MaxValue){
             Vector3 screenPoint = Camera.main.WorldToScreenPoint(Target.position);
-            if (screenPoint.z>0.0f){
+            if (screenPoint.z>0.0f){ //If the label's in front of you
                 int newSize=(int)(sizeBounds[1]/screenPoint.z);
                 Text t = GetComponent<Text>();
-                if (newSize>sizeBounds[0]){
+                if (newSize>sizeBounds[0]){ //If the label is close enough to you to be rendered, rescale based on its distance to you
                     if (newSize<sizeBounds[1]){
                         t.fontSize=newSize;
                     }

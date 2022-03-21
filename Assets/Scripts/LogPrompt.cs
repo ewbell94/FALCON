@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Behavior for the error/warning log that flashes on screen
 public class LogPrompt : MonoBehaviour
 {
-    private float fadeLength = 0.5f;
+    private float fadeLength = 0.5f; //How long it takes to fade out
     private float fadeWhen = 0.0f;
     Text t;
     Color initialColor;
@@ -15,7 +16,6 @@ public class LogPrompt : MonoBehaviour
         initialColor = t.color;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (Time.time > fadeWhen && t.color.a > 0.0f){
@@ -23,6 +23,7 @@ public class LogPrompt : MonoBehaviour
         }
     }
 
+    //Shows the error prompt text, using color textColor, for showLength seconds
     public void SetText(string text, Color textColor, float showLength){
         t.text = text;
         t.color = textColor;

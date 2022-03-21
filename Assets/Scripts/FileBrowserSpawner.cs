@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using SimpleFileBrowser;
+
+//Class to interface with the SimpleFileBrowser plugin
 public class FileBrowserSpawner : MonoBehaviour
 {
     public GameObject fileBrowserPrefab;
@@ -15,6 +17,7 @@ public class FileBrowserSpawner : MonoBehaviour
         }
     }
 
+    //Spawns a SimpleFileBrowser load window
     public void SpawnLoader(FileBrowser.OnSuccess onSuccess, FileBrowser.OnCancel onCancel, string title, string fileExtension, Vector3 position, Quaternion rotation){
         GameObject fBrowser = (GameObject) Instantiate(fileBrowserPrefab,Vector3.zero,Quaternion.identity);
         if (uiWrapper == null){

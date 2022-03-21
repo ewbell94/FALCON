@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Wraps VR UI elements into a screen overlay for the MK scene
 public class MKUIWrapper : MonoBehaviour
 {
     public void WrapUI(GameObject element){
-        Vector2 uiSize = element.GetComponent<RectTransform>().sizeDelta + new Vector2(100.0f,100.0f);
+        Vector2 uiSize = element.GetComponent<RectTransform>().sizeDelta; //+ new Vector2(100.0f,100.0f);
         element.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
         CanvasScaler cs = element.GetComponent<CanvasScaler>();
         cs.uiScaleMode = UnityEngine.UI.CanvasScaler.ScaleMode.ScaleWithScreenSize;

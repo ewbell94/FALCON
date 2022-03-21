@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random=UnityEngine.Random;
 
+//The main meat of the visualizer; holds states, generates coordinates, instantiates networks, etc.
 public class NetworkBuilder : MonoBehaviour
 {
     public GameObject nodePrefab;
@@ -52,6 +53,11 @@ public class NetworkBuilder : MonoBehaviour
         }
         float t0=Time.realtimeSinceStartup;
         string[] nodeGroups = AssessNodeGrouping(nodeNames);
+        if (nodeGroups == null){
+            lp.SetText("ERROR: loaded state has nodes not present in the current network.", Color.red, 5.0f);
+            move.movementActive=true;
+            return;
+        }
         Vector3[] nodePositions= GDCoords(edgeGraph);
         float t1=Time.realtimeSinceStartup;
         Debug.Log(t1-t0);
@@ -108,6 +114,7 @@ public class NetworkBuilder : MonoBehaviour
         float epsilon=0.00000001f; //Keeps denominator nonzero
         float k=1.0f; //Spring constant/weight for spring energy term
         float tol=0.1f; //Tolerance for stopping GD
+        int iterationStop=1000; //Threshold for stopping optimization
         Vector3[] coords=new Vector3[nodeCount];
         Vector3[] m = new Vector3[nodeCount];
         Vector3[] c = new Vector3[nodeCount];
@@ -116,9 +123,13 @@ public class NetworkBuilder : MonoBehaviour
         }
         Debug.Log(nodeCount);
         Vector3 center=CenterOfMass(coords);
-        float totalE=float.PositiveInfinity;
+        float[] pastE = new float[3];
+        for (int i=0; i<pastE.Length; i++){
+            pastE[i]=float.MaxValue;
+        }
         float deltaE=float.PositiveInfinity;
-        while (deltaE > tol){
+        int iterationCount = 0;
+        while (deltaE > tol && iterationCount < iterationStop){
             Vector3[] newCoords=new Vector3[nodeCount];
             Parallel.For(0,nodeCount,n=>{
                 Vector3 pointn=coords[n];
@@ -163,9 +174,16 @@ public class NetworkBuilder : MonoBehaviour
             foreach (float E in nodeE){
                 newE+=E;
             }
-            deltaE=totalE-newE;
-            totalE=newE;
+            float totalDelta=0.0f;
+            for (int past=0; past<pastE.Length-1; past++){
+                totalDelta+=pastE[past]-pastE[past+1];
+                pastE[past]=pastE[past+1];
+            }
+            totalDelta+=pastE[pastE.Length-1]-newE;
+            pastE[pastE.Length-1]=newE;
+            deltaE=totalDelta/pastE.Length;
             Debug.Log(new Vector2(newE,deltaE));
+            iterationCount++;
         }
         coords=RegularizeCoords(coords);
         return coords;

@@ -29,7 +29,7 @@ public class NodeOptions : MonoBehaviour
         updateWhen=Time.fixedTime+updateInterval;
         optionsMenu = GameObject.Find("OptionsMenu(Clone)");
         networkBuilder = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
-        colorPicker = transform.Find("FlexibleColorPicker").gameObject;
+        colorPicker = transform.Find("NodeGroupWindow/NodeGroupViewer/FlexibleColorPicker").gameObject;
         optionsMenu.SetActive(false);
         float nodeScale = -1.0f;
         GameObject[] nodeGroups = GameObject.FindGameObjectsWithTag("NodeGroup");
@@ -108,6 +108,7 @@ public class NodeOptions : MonoBehaviour
         RectTransform rt = nodeGroupViewerContent.GetComponent<RectTransform>();
         GameObject newGroupRow = (GameObject) Instantiate(nodeGroupRowPrefab,Vector3.zero,Quaternion.identity);
         newGroupRow.transform.SetParent(nodeGroupViewerContent.transform,false);
+        newGroupRow.transform.SetAsFirstSibling();
         newGroupRow.GetComponent<RectTransform>().anchoredPosition = new Vector2(0.0f,-rt.sizeDelta.y);
         GameObject cpb = newGroupRow.transform.Find("ColorPicker/Button").gameObject;
         cpb.GetComponent<Button>().onClick.AddListener(delegate{ColorPicker(cpb);});
@@ -126,6 +127,7 @@ public class NodeOptions : MonoBehaviour
         gameObject.SetActive(false);
     }
 
+    //This function renames nodes based on a CSV at the location "path"
     private void RenameNodes(string path){
         string[] lines=File.ReadAllLines(path);
         Dictionary<string,string> nameDict = new Dictionary<string,string>();
@@ -154,9 +156,6 @@ public class NodeOptions : MonoBehaviour
     //Opens and closes the color picker when clicked
     public void ColorPicker(GameObject button){
         if (colorPicker.transform.localScale.x == 0.0f){
-            colorPicker.transform.SetParent(button.transform);
-            Vector2 buttonPos = button.GetComponent<RectTransform>().anchoredPosition;
-            colorPicker.GetComponent<RectTransform>().anchoredPosition = new Vector2(buttonPos.x-10.0f,buttonPos.y);
             colorPicker.transform.localScale = new Vector3(0.7f,0.7f,0.7f);
         } else {
             button.GetComponent<Image>().color = colorPicker.GetComponent<FlexibleColorPicker>().color;
