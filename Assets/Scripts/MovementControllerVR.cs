@@ -52,9 +52,16 @@ public class MovementControllerVR : MovementController
                 rightController.TryGetFeatureValue(CommonUsages.primaryButton, out buttonPressed);
                 if (!buttonPressed){
                     rightController.TryGetFeatureValue(CommonUsages.secondaryButton, out buttonPressed);
+                    if (!buttonPressed){ //Vive primary buttons don't work...
+                        leftController.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out buttonPressed);
+                        if (!buttonPressed){
+                            rightController.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out buttonPressed);
+                        }
+                    }
                 }
             }
         }
+    
 
         if (movementActive){
             //Controls up/down motion
@@ -85,8 +92,8 @@ public class MovementControllerVR : MovementController
             }
 
             //Controls opening the menu (press any button)
-            if (buttonPressed){
-                if (!prevPressed){
+            if (buttonPressed){ 
+                if (!prevPressed && !teleportRay.gameObject.activeSelf){ //If telport is active, it breaks when movementActive goes away
                     Vector3 optPos=Camera.main.transform.position+2.5f*Camera.main.transform.forward;
                     openMenu = (GameObject) Instantiate(optionsMenuPrefab,new Vector3(optPos.x,Camera.main.transform.position.y,optPos.z),Quaternion.Euler(0.0f,Camera.main.transform.rotation.eulerAngles.y,0.0f));
                     movementActive=false;
