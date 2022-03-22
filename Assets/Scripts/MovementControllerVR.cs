@@ -11,8 +11,8 @@ public class MovementControllerVR : MovementController
     public GameObject optionsMenuPrefab;
     
     private NetworkBuilder networkBuilder;
-    private InputDevice rightController;
-    private InputDevice leftController;
+    private InputDevice rightController = new InputDevice();
+    private InputDevice leftController = new InputDevice();
     private GameObject openMenu = null;
     private float activationThreshold = 0.25f; //Dead zone for control sticks 
     private float scrollSpeed=7.5f; //Speed for going up/down
@@ -21,25 +21,28 @@ public class MovementControllerVR : MovementController
 
     void Start() {
         teleportRay.gameObject.SetActive(false);
-        List<InputDevice> devices = new List<InputDevice>();
-        InputDeviceCharacteristics rightControllerCharacteristics = InputDeviceCharacteristics.Right | InputDeviceCharacteristics.Controller;
-        InputDevices.GetDevicesWithCharacteristics(rightControllerCharacteristics, devices);
-        if (devices.Count > 0){
-            rightController=devices[0];
-        }
-
-        devices=new List<InputDevice>(); 
-        InputDeviceCharacteristics leftControllerCharacteristics = InputDeviceCharacteristics.Left | InputDeviceCharacteristics.Controller;
-        InputDevices.GetDevicesWithCharacteristics(leftControllerCharacteristics, devices);
-        if (devices.Count > 0){
-            leftController=devices[0];
-        }
-
         networkBuilder = GameObject.Find("NetworkBuilder").GetComponent<NetworkBuilder>();
+    }
+
+    private InputDevice GetDeviceWithCharacteristics(InputDeviceCharacteristics characteristics){
+        List<InputDevice> devices = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(characteristics, devices);
+        if (devices.Count > 0){
+            return devices[0];
+        } else {
+            Debug.Log("No device was found!");
+            return new InputDevice();
+        }
     }
 
     void Update()
     {
+        if (rightController.name == null || leftController.name == null){
+            InputDeviceCharacteristics rightControllerCharacteristics = InputDeviceCharacteristics.Right | InputDeviceCharacteristics.Controller;
+            rightController = GetDeviceWithCharacteristics(rightControllerCharacteristics);
+            InputDeviceCharacteristics leftControllerCharacteristics = InputDeviceCharacteristics.Left | InputDeviceCharacteristics.Controller;
+            leftController = GetDeviceWithCharacteristics(leftControllerCharacteristics);
+        }
         //Check if a face button is pressed (any of them, really)
         bool buttonPressed=false;
         leftController.TryGetFeatureValue(CommonUsages.primaryButton, out buttonPressed);
